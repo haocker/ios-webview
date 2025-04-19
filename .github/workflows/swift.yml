@@ -1,0 +1,67 @@
+name: Build Unsigned IPA and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 触发工作流的条件，仅在推送带有 v 开头的标签时触发（例如 v1.0.0）
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: macos-latest  # 使用 macOS 环境，因为 Xcode 构建需要 macOS
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2. 设置 Xcode 版本（可选，指定某个版本）
+      - name: Select Xcode Version
+        run: sudo xcode-select -switch /Applications/Xcode.app
+
+      # 3. 安装依赖（如果项目使用 CocoaPods）
+      - name: Install CocoaPods Dependencies
+        run: |
+          if [ -f "Podfile" ]; then
+            pod install
+          fi
+
+      # 4. 构建项目并生成未签名的 IPA
+      - name: Build Unsigned IPA
+        run: |
+          # 确保使用正确的 scheme 和 configuration
+          xcodebuild -workspace "web-view.xcodeproj/project.xcworkspace" \
+                     -scheme "Simple Universal Webview App" \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     -archivePath ./build/SimpleUniversalWebviewApp.xcarchive \
+                     clean archive
+        
+          # 导出未签名的 IPA 文件
+          xcodebuild -exportArchive \
+                     -archivePath ./build/SimpleUniversalWebviewApp.xcarchive \
+                     -exportOptionsPlist ./exportOptions.plist \
+                     -exportPath ./build
+
+      # 5. 发布到 GitHub Releases
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub 提供的令牌
+        with:
+          tag_name: ${{ github.ref_name }}  # 使用推送的标签名称
+          release_name: Release ${{ github.ref_name }}  # 发布名称
+          draft: false  # 是否为草稿，false 表示直接发布
+          prerelease: false  # 是否为预发布版本
+
+      # 6. 上传 IPA 文件到 Release
+      - name: Upload IPA to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # 从 create_release 步骤获取上传 URL
+          asset_path: ./build/Simple Universal Webview App.ipa  # IPA 文件路径
+          asset_name: SimpleUniversalWebviewApp-${{ github.ref_name }}.ipa  # 上传的文件名
+          asset_content_type: application/octet-stream  # 文件类型
