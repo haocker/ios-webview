@@ -72,19 +72,27 @@ jobs:
             ls -la ./build/web-view.ipa || echo "Manual IPA creation failed"
           fi
 
-      # 6. 发布到 GitHub Releases
+      # 6. 生成基于时间的动态 tag_name
+      - name: Generate Dynamic Tag Name
+        id: generate_tag
+        run: |
+          TAG_NAME="v$(date +%Y-%m-%d-%H-%M-%S)"
+          echo "Generated tag_name: $TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      # 7. 创建 Release，使用动态 tag_name
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub 提供的令牌
         with:
-          tag_name: ${{ github.ref_name }}  # 使用推送的标签名称
-          release_name: Release ${{ github.ref_name }}  # 发布名称
+          tag_name: ${{ steps.generate_tag.outputs.tag_name }}  # 使用动态生成的标签名称
+          release_name: Release ${{ steps.generate_tag.outputs.tag_name }}  # 发布名称
           draft: false  # 是否为草稿，false 表示直接发布
           prerelease: false  # 是否为预发布版本
 
-      # 7. 上传 IPA 文件到 Release
+      # 8. 上传 IPA 文件到 Release
       - name: Upload IPA to Release
         uses: actions/upload-release-asset@v1
         env:
@@ -92,5 +100,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}  # 从 create_release 步骤获取上传 URL
           asset_path: ./build/web-view.ipa  # IPA 文件路径，匹配 scheme 名称
-          asset_name: WebViewApp-${{ github.ref_name }}.ipa  # 上传的文件名
+          asset_name: WebViewApp-${{ steps.generate_tag.outputs.tag_name }}.ipa  # 上传的文件名，包含动态标签
           asset_content_type: application/octet-stream  # 文件类型
