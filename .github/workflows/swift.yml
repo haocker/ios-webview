@@ -15,18 +15,30 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2. 设置 Xcode 版本（可选，指定某个版本）
+      # 2. 调试：列出文件结构
+      - name: List Files in Repository
+        run: |
+          echo "Listing files in the repository:"
+          ls -la
+          echo "Checking for workspace file:"
+          find . -name "*.xcworkspace" -type d
+          echo "Checking for project file:"
+          find . -name "*.xcodeproj" -type d
+          echo "Checking for exportOptions.plist:"
+          ls -la exportOptions.plist || echo "exportOptions.plist not found"
+
+      # 3. 设置 Xcode 版本（可选，指定某个版本）
       - name: Select Xcode Version
         run: sudo xcode-select -switch /Applications/Xcode.app
 
-      # 3. 安装依赖（如果项目使用 CocoaPods）
+      # 4. 安装依赖（如果项目使用 CocoaPods）
       - name: Install CocoaPods Dependencies
         run: |
           if [ -f "Podfile" ]; then
             pod install
           fi
 
-      # 4. 构建项目并生成未签名的 IPA
+      # 5. 构建项目并生成未签名的 IPA
       - name: Build Unsigned IPA
         run: |
           # 确保使用正确的 scheme 和 configuration，禁用签名
@@ -34,7 +46,7 @@ jobs:
                      -scheme "web-view" \
                      -sdk iphoneos \
                      -configuration Release \
-                     -archivePath ./build/SimpleUniversalWebviewApp.xcarchive \
+                     -archivePath ./build/web-view.xcarchive \
                      CODE_SIGN_IDENTITY="" \
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGNING_ALLOWED=NO \
@@ -43,11 +55,11 @@ jobs:
           
           # 导出未签名的 IPA 文件
           xcodebuild -exportArchive \
-                     -archivePath ./build/SimpleUniversalWebviewApp.xcarchive \
+                     -archivePath ./build/web-view.xcarchive \
                      -exportOptionsPlist ./exportOptions.plist \
                      -exportPath ./build || echo "Export failed, check archive path"
 
-      # 5. 发布到 GitHub Releases
+      # 6. 发布到 GitHub Releases
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -59,13 +71,13 @@ jobs:
           draft: false  # 是否为草稿，false 表示直接发布
           prerelease: false  # 是否为预发布版本
 
-      # 6. 上传 IPA 文件到 Release
+      # 7. 上传 IPA 文件到 Release
       - name: Upload IPA to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}  # 从 create_release 步骤获取上传 URL
-          asset_path: ./build/Simple Universal Webview App.ipa  # IPA 文件路径
-          asset_name: SimpleUniversalWebviewApp-${{ github.ref_name }}.ipa  # 上传的文件名
+          asset_path: ./build/web-view.ipa  # IPA 文件路径，匹配 scheme 名称
+          asset_name: WebViewApp-${{ github.ref_name }}.ipa  # 上传的文件名
           asset_content_type: application/octet-stream  # 文件类型
