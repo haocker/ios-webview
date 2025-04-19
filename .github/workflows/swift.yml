@@ -31,7 +31,7 @@ jobs:
         run: |
           # 确保使用正确的 scheme 和 configuration
           xcodebuild -workspace "web-view.xcodeproj/project.xcworkspace" \
-                     -scheme "Simple Universal Webview App" \
+                     -scheme "web-view" \
                      -sdk iphoneos \
                      -configuration Release \
                      -archivePath ./build/SimpleUniversalWebviewApp.xcarchive \
