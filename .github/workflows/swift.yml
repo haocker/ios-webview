@@ -26,6 +26,8 @@ jobs:
           find . -name "*.xcodeproj" -type d
           echo "Checking for exportOptions.plist:"
           ls -la exportOptions.plist || echo "exportOptions.plist not found"
+          echo "Content of exportOptions.plist:"
+          cat exportOptions.plist || echo "Unable to read exportOptions.plist"
 
       # 3. 设置 Xcode 版本（可选，指定某个版本）
       - name: Select Xcode Version
@@ -53,11 +55,22 @@ jobs:
                      IPHONEOS_DEPLOYMENT_TARGET=12.0 \
                      clean archive || echo "Build failed, check workspace path and scheme name"
           
-          # 导出未签名的 IPA 文件
+          # 尝试导出未签名的 IPA 文件
           xcodebuild -exportArchive \
                      -archivePath ./build/web-view.xcarchive \
                      -exportOptionsPlist ./exportOptions.plist \
-                     -exportPath ./build || echo "Export failed, check archive path"
+                     -exportPath ./build || echo "Export failed, proceeding to manual IPA creation"
+          
+          # 如果导出失败，手动打包 IPA 文件
+          if [ ! -f "./build/web-view.ipa" ]; then
+            echo "Manual IPA creation: Creating IPA from archive"
+            mkdir -p ./build/Payload
+            cp -r ./build/web-view.xcarchive/Products/Applications/web-view.app ./build/Payload/
+            cd ./build
+            zip -r web-view.ipa Payload
+            cd ..
+            ls -la ./build/web-view.ipa || echo "Manual IPA creation failed"
+          fi
 
       # 6. 发布到 GitHub Releases
       - name: Create Release
