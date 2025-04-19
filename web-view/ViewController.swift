@@ -19,7 +19,8 @@ class ViewController: UIViewController {
         let requestObj = NSURLRequest(url: url! as URL);
         webView.loadRequest(requestObj as URLRequest);
         
-        
+        // 设置WebView为全屏，但不隐藏状态栏
+        webView.frame = self.view.bounds
     }
     
     override func didReceiveMemoryWarning() {
