@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地HTML页面</title>
+    <script>
+        function setStatusBarHeight(height) {
+            document.getElementById('statusBarHeight').textContent = '状态栏高度: ' + height + 'px';
+            // 可以在这里使用高度进行其他操作
+            console.log('状态栏高度:', height);
+        }
+    </script>
+</head>
+<body>
+    <h1>欢迎使用本地HTML页面</h1>
+    <p>这是WebView加载的本地内容。</p>
+    <p id="statusBarHeight">状态栏高度: 未知</p>
+</body>
+</html>

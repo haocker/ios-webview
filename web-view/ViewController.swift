@@ -15,12 +15,22 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        let url = NSURL (string: "https://apple.com");
-        let requestObj = NSURLRequest(url: url! as URL);
-        webView.loadRequest(requestObj as URLRequest);
+        // 加载本地HTML文件
+        if let htmlPath = Bundle.main.path(forResource: "www/index", ofType: "html") {
+            let url = URL(fileURLWithPath: htmlPath)
+            let request = URLRequest(url: url)
+            webView.loadRequest(request)
+        } else {
+            print("无法找到本地HTML文件")
+        }
         
         // 设置WebView为全屏，但不隐藏状态栏
         webView.frame = self.view.bounds
+        
+        // 获取状态栏高度并传递给WebView
+        let statusBarHeight = UIApplication.shared.statusBarFrame.height
+        let jsString = "setStatusBarHeight(\(statusBarHeight));"
+        webView.stringByEvaluatingJavaScript(from: jsString)
     }
     
     override func didReceiveMemoryWarning() {
