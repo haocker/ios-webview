@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>本地HTML页面</title>
     <script src="https://cdn.bootcss.com/vConsole/3.3.4/vconsole.min.js"></script>
     <script>
@@ -25,13 +25,8 @@
                 console.error(error.message);
             }
         };
-        async function geth(){
-            try {
-                const height = await acjsapi.getStatusBarHeight();
-                receiveStatusBarHeight(height);
-            } catch (error) {
-                console.error(error.message);
-            }
+        function geth(){
+           location.href="https://www.wensoft.cn";
         }
     </script>
 </head>
