@@ -20,7 +20,7 @@ class ViewController: UIViewController {
         if let htmlPath = Bundle.main.path(forResource: "www/index", ofType: "html") {
             let url = URL(fileURLWithPath: htmlPath)
             let request = URLRequest(url: url)
-            webView.loadRequest(request)
+            webView.load(request)
         } else {
             print("无法找到本地HTML文件")
         }
