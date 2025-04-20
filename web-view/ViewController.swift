@@ -26,7 +26,7 @@ class ViewController: UIViewController {
         }
         
         // // 设置WebView为全屏，但不隐藏状态栏
-        // webView.frame = self.view.bounds
+        webView.frame = self.view.bounds
         
         // // 获取状态栏高度并传递给WebView
         // let statusBarHeight = UIApplication.shared.statusBarFrame.height
