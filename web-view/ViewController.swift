@@ -33,11 +33,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         }
         
         // 使用计时器延迟执行JavaScript代码
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            let statusBarHeight = UIApplication.shared.statusBarFrame.height
-            let jsString = "setStatusBarHeight(\(statusBarHeight));"
-            self.webView.evaluateJavaScript(jsString, completionHandler: nil)
-        }
+        
     }
     
     override func didReceiveMemoryWarning() {
