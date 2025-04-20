@@ -2,6 +2,41 @@ import UIKit
 import WebKit
 
 class JSBridge: NSObject, WKScriptMessageHandler {
+    // 定义方法处理逻辑的映射表
+    private let methodHandlers: [String: ([String: Any]) -> Any?] = {
+        var handlers: [String: ([String: Any]) -> Any?] = [:]
+        
+        handlers["getStatusBarHeight"] = { _ in
+            return UIApplication.shared.statusBarFrame.height
+        }
+        
+        handlers["getDeviceInfo"] = { _ in
+            return [
+                "model": UIDevice.current.model,
+                "systemName": UIDevice.current.systemName,
+                "systemVersion": UIDevice.current.systemVersion
+            ]
+        }
+        
+        return handlers
+    }()
+    
+    // 统一处理返回值
+    private func sendResponse(callbackId: String, result: Any?) {
+        if let result = result {
+            if let jsonData = try? JSONSerialization.data(withJSONObject: result, options: []),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                let jsString = "acjsapi.callback('\(callbackId)', \(jsonString), null);"
+                webView?.evaluateJavaScript(jsString, completionHandler: nil)
+            } else {
+                let jsString = "acjsapi.callback('\(callbackId)', null, 'Error serializing result');"
+                webView?.evaluateJavaScript(jsString, completionHandler: nil)
+            }
+        } else {
+            let jsString = "acjsapi.callback('\(callbackId)', null, null);"
+            webView?.evaluateJavaScript(jsString, completionHandler: nil)
+        }
+    }
     private weak var webView: WKWebView?
     
     init(webView: WKWebView) {
@@ -12,11 +47,12 @@ class JSBridge: NSObject, WKScriptMessageHandler {
     }
     
     private func setupMessageHandlers() {
-        // 添加所有需要暴露给JS的方法
+        // 自动注册所有需要暴露给JS的方法
+        let exposedMethods = Array(methodHandlers.keys)
         if let contentController = webView?.configuration.userContentController {
-            contentController.add(self, name: "getStatusBarHeight")
-            // 可以在这里添加更多方法
-            contentController.add(self, name: "getDeviceInfo")
+            for method in exposedMethods {
+                contentController.add(self, name: method)
+            }
         }
     }
     
@@ -91,25 +127,11 @@ class JSBridge: NSObject, WKScriptMessageHandler {
             return
         }
         
-        switch message.name {
-        case "getStatusBarHeight":
-            let statusBarHeight = UIApplication.shared.statusBarFrame.height
-            let jsString = "acjsapi.callback('\(callbackId)', \(statusBarHeight), null);"
-            webView?.evaluateJavaScript(jsString, completionHandler: nil)
-            
-        case "getDeviceInfo":
-            let deviceInfo = [
-                "model": UIDevice.current.model,
-                "systemName": UIDevice.current.systemName,
-                "systemVersion": UIDevice.current.systemVersion
-            ]
-            if let jsonData = try? JSONSerialization.data(withJSONObject: deviceInfo, options: []),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                let jsString = "acjsapi.callback('\(callbackId)', \(jsonString), null);"
-                webView?.evaluateJavaScript(jsString, completionHandler: nil)
-            }
-            
-        default:
+        // 动态处理暴露的方法
+        if let handler = methodHandlers[message.name] {
+            let result = handler(body)
+            sendResponse(callbackId: callbackId, result: result)
+        } else {
             let jsString = "acjsapi.callback('\(callbackId)', null, 'Method \(message.name) not implemented');"
             webView?.evaluateJavaScript(jsString, completionHandler: nil)
         }
