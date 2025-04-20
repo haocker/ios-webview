@@ -40,10 +40,44 @@ class JSBridge: NSObject, WKScriptMessageHandler {
     
     // 统一处理返回值
     private func sendResponse(callbackId: String, result: Any?) {
+        // 确保 webView 存在，避免在释放后调用导致崩溃
+        guard let webView = webView else {
+            print("JSBridge: webView is nil, cannot send response for callbackId: \(callbackId)")
+            return
+        }
         
-        let jsString = "acjsapi.callback('\(callbackId)', '48', null);"
-        webView?.evaluateJavaScript(jsString, completionHandler: nil)
+        // 准备 JavaScript 回调字符串
+        var jsString: String
+        if let result = result {
+            if JSONSerialization.isValidJSONObject(result) {
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: result, options: [])
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        jsString = "acjsapi.callback('\(callbackId)', \(jsonString), null);"
+                    } else {
+                        jsString = "acjsapi.callback('\(callbackId)', null, 'Error converting JSON data to string');"
+                    }
+                } catch {
+                    print("JSBridge: JSON serialization error for callbackId \(callbackId): \(error)")
+                    jsString = "acjsapi.callback('\(callbackId)', null, 'Error serializing result: \(error.localizedDescription)');"
+                }
+            } else if let stringResult = result as? String {
+                // 处理字符串类型的返回值
+                jsString = "acjsapi.callback('\(callbackId)', \"\(stringResult)\", null);"
+            } else {
+                print("JSBridge: Result is not a valid JSON object or string for callbackId \(callbackId)")
+                jsString = "acjsapi.callback('\(callbackId)', null, 'Result is not a valid JSON object or string');"
+            }
+        } else {
+            jsString = "acjsapi.callback('\(callbackId)', null, null);"
+        }
         
+        // 执行 JavaScript 回调，并处理可能的错误
+        webView.evaluateJavaScript(jsString) { (_, error) in
+            if let error = error {
+                print("JSBridge: evaluateJavaScript error for callbackId \(callbackId): \(error)")
+            }
+        }
     }
     private func setupMessageHandlers() {
         // 自动注册所有需要暴露给JS的方法
