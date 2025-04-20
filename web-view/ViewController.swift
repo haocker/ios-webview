@@ -15,7 +15,9 @@ class ViewController: UIViewController, WKScriptMessageHandler {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // Do any additional setup after loading the view, typically from a nib.
+        // 设置WKWebView的userContentController
+        let userContentController = WKUserContentController()
         
         // 在文档加载前注入acjsapi
         let scriptSource = """
@@ -77,9 +79,7 @@ class ViewController: UIViewController, WKScriptMessageHandler {
         let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentStart, forMainFrameOnly: true)
         userContentController.addUserScript(userScript)
         
-        // Do any additional setup after loading the view, typically from a nib.
-        // 设置WKWebView的userContentController
-        let userContentController = WKUserContentController()
+        
         userContentController.add(self, name: "getStatusBarHeight")
         webView.configuration.userContentController = userContentController
         // 加载本地HTML文件
