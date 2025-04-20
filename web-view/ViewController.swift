@@ -9,7 +9,7 @@
 import UIKit
 import WebKit
 
-class ViewController: UIViewController, WKScriptMessageHandler {
+class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate {
     
     var webView: WKWebView!
     
@@ -89,6 +89,7 @@ class ViewController: UIViewController, WKScriptMessageHandler {
         // 通过编程方式创建WKWebView
         webView = WKWebView(frame: self.view.bounds, configuration: configuration)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.navigationDelegate = self
         self.view.addSubview(webView)
         
         // 加载本地HTML文件
@@ -105,6 +106,21 @@ class ViewController: UIViewController, WKScriptMessageHandler {
             webView.frame = self.view.safeAreaLayoutGuide.layoutFrame
         } else {
             webView.frame = self.view.bounds
+            // MARK: - WKNavigationDelegate
+            
+            func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+                if navigationAction.navigationType == .linkActivated {
+                    if let url = navigationAction.request.url {
+                        // 允许打开外部链接
+                        decisionHandler(.allow)
+                    } else {
+                        decisionHandler(.cancel)
+                    }
+                } else {
+                    decisionHandler(.allow)
+                }
+            }
+            
         }
         
         // 禁止WebView缩放
