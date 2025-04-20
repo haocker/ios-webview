@@ -116,6 +116,14 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         // Dispose of any resources that can be recreated.
     }
     
+    // 添加返回手势支持
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // 启用返回手势
+        webView.allowsBackForwardNavigationGestures = true
+    }
+    
     // 实现WKScriptMessageHandler协议方法
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "getStatusBarHeight" {
