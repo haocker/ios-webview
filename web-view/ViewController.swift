@@ -29,7 +29,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         webView.frame = self.view.bounds
         
         // 设置导航代理
-        webView.navigationDelegate = self
+        //webView.navigationDelegate = self
         
         // 获取状态栏高度并传递给WebView
         // 由于页面可能尚未加载完成，我们在didFinishNavigation中执行JavaScript
