@@ -29,9 +29,9 @@ class ViewController: UIViewController {
         webView.frame = self.view.bounds
         
         // // 获取状态栏高度并传递给WebView
-        // let statusBarHeight = UIApplication.shared.statusBarFrame.height
-        // let jsString = "setStatusBarHeight(\(statusBarHeight));"
-        // webView.evaluateJavaScript(jsString, completionHandler: nil)
+        let statusBarHeight = UIApplication.shared.statusBarFrame.height
+        let jsString = "setStatusBarHeight(\(statusBarHeight));"
+        webView.evaluateJavaScript(jsString, completionHandler: nil)
     }
     
     override func didReceiveMemoryWarning() {
