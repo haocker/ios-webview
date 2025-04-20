@@ -9,7 +9,7 @@
 import UIKit
 import WebKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, WKNavigationDelegate {
     
     @IBOutlet weak var webView: WKWebView!
     
@@ -28,15 +28,24 @@ class ViewController: UIViewController {
         // // 设置WebView为全屏，但不隐藏状态栏
         webView.frame = self.view.bounds
         
-        // // 获取状态栏高度并传递给WebView
-        let statusBarHeight = UIApplication.shared.statusBarFrame.height
-        let jsString = "setStatusBarHeight(\(statusBarHeight));"
-        webView.evaluateJavaScript(jsString, completionHandler: nil)
+        // 设置导航代理
+        webView.navigationDelegate = self
+        
+        // 获取状态栏高度并传递给WebView
+        // 由于页面可能尚未加载完成，我们在didFinishNavigation中执行JavaScript
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+        
+        // MARK: - WKNavigationDelegate
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            let statusBarHeight = UIApplication.shared.statusBarFrame.height
+            let jsString = "setStatusBarHeight(\(statusBarHeight));"
+            webView.evaluateJavaScript(jsString, completionHandler: nil)
+        }
     }
     
     
