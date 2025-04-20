@@ -10,6 +10,7 @@ import UIKit
 import WebKit
 
 class ViewController: UIViewController, WKNavigationDelegate {
+    // 注意：如果仍然出现找不到JSBridge类型的错误，请确保JSBridge.swift文件被包含在项目目标中
     
     var webView: WKWebView!
     // JSBridge实例
@@ -71,7 +72,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if navigationAction.navigationType == .linkActivated {
-            if let url = navigationAction.request.url {
+            if navigationAction.request.url != nil {
                 // 允许打开外部链接
                 decisionHandler(.allow)
             } else {
