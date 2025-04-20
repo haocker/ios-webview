@@ -64,9 +64,12 @@ class JSBridge: NSObject, WKScriptMessageHandler {
             } else if let stringResult = result as? String {
                 // 处理字符串类型的返回值
                 jsString = "acjsapi.callback('\(callbackId)', \"\(stringResult)\", null);"
+            } else if let numberResult = result as? NSNumber {
+                // 处理数字和布尔类型的返回值
+                jsString = "acjsapi.callback('\(callbackId)', \(numberResult), null);"
             } else {
-                print("JSBridge: Result is not a valid JSON object or string for callbackId \(callbackId)")
-                jsString = "acjsapi.callback('\(callbackId)', null, 'Result is not a valid JSON object or string');"
+                print("JSBridge: Result is not a supported type for callbackId \(callbackId)")
+                jsString = "acjsapi.callback('\(callbackId)', null, 'Result type is not supported');"
             }
         } else {
             jsString = "acjsapi.callback('\(callbackId)', null, null);"
