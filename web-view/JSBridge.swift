@@ -2,15 +2,22 @@ import UIKit
 import WebKit
 
 class JSBridge: NSObject, WKScriptMessageHandler {
+    
+    private weak var webView: WKWebView?
+    
+    init(webView: WKWebView) {
+        self.webView = webView
+        super.init()
+        setupMessageHandlers()
+        setupUserScript()
+    }
+
     // 定义方法处理逻辑的映射表
     private let methodHandlers: [String: ([String: Any]) -> Any?] = {
         var handlers: [String: ([String: Any]) -> Any?] = [:]
         
         handlers["getStatusBarHeight"] = { _ in
-            if let windowScene = UIApplication.shared.windows.first?.windowScene {
-                return windowScene.statusBarManager?.statusBarFrame.height ?? 0
-            }
-            return 0
+             return UIApplication.shared.statusBarFrame.height
         }
         
         handlers["getDeviceInfo"] = { _ in
@@ -47,14 +54,6 @@ class JSBridge: NSObject, WKScriptMessageHandler {
             let jsString = "acjsapi.callback('\(callbackId)', null, null);"
             webView?.evaluateJavaScript(jsString, completionHandler: nil)
         }
-    }
-    private weak var webView: WKWebView?
-    
-    init(webView: WKWebView) {
-        self.webView = webView
-        super.init()
-        setupMessageHandlers()
-        setupUserScript()
     }
     
     private func setupMessageHandlers() {
