@@ -102,11 +102,8 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
         }
         
         // 设置WebView为全屏，考虑安全区域以实现沉浸式效果
-        if #available(iOS 11.0, *) {
-            webView.frame = self.view.safeAreaLayoutGuide.layoutFrame
-        } else {
-            webView.frame = self.view.bounds
-        }
+        webView.frame = self.view.bounds
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
         
         // 禁止WebView缩放
         webView.scrollView.minimumZoomScale = 1.0
