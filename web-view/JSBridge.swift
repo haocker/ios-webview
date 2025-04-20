@@ -7,7 +7,10 @@ class JSBridge: NSObject, WKScriptMessageHandler {
         var handlers: [String: ([String: Any]) -> Any?] = [:]
         
         handlers["getStatusBarHeight"] = { _ in
-            return UIApplication.shared.statusBarFrame.height
+            if let windowScene = UIApplication.shared.windows.first?.windowScene {
+                return windowScene.statusBarManager?.statusBarFrame.height ?? 0
+            }
+            return 0
         }
         
         handlers["getDeviceInfo"] = { _ in
@@ -37,7 +40,7 @@ class JSBridge: NSObject, WKScriptMessageHandler {
                 let jsString = "acjsapi.callback('\(callbackId)', \(jsonString), null);"
                 webView?.evaluateJavaScript(jsString, completionHandler: nil)
             } else {
-                let jsString = "acjsapi.callback('\(callbackId)', null, 'Error serializing result');"
+                let jsString = "acjsapi.callback('\(callbackId)', null, 'Error in result processing');"
                 webView?.evaluateJavaScript(jsString, completionHandler: nil)
             }
         } else {
