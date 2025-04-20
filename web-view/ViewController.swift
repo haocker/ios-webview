@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import WebKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var webView: UIWebView!
+    @IBOutlet weak var webView: WKWebView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +31,7 @@ class ViewController: UIViewController {
         // 获取状态栏高度并传递给WebView
         let statusBarHeight = UIApplication.shared.statusBarFrame.height
         let jsString = "setStatusBarHeight(\(statusBarHeight));"
-        webView.stringByEvaluatingJavaScript(from: jsString)
+        webView.evaluateJavaScript(jsString, completionHandler: nil)
     }
     
     override func didReceiveMemoryWarning() {
