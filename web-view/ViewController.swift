@@ -41,11 +41,11 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         // MARK: - WKNavigationDelegate
         
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        //func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             // let statusBarHeight = UIApplication.shared.statusBarFrame.height
             // let jsString = "setStatusBarHeight(\(statusBarHeight));"
             // webView.evaluateJavaScript(jsString, completionHandler: nil)
-        }
+        //}
     }
     
     
