@@ -18,6 +18,14 @@ class JSBridge: NSObject, WKScriptMessageHandler {
             ]
         }
         
+        handlers["processData"] = { params in
+            if let data = params["args"] as? [String: Any],
+               let input = data["data"] as? String {
+                return ["processed": "处理后的数据: \(input)" ]
+            }
+            return ["error": "无效的输入数据"]
+        }
+        
         return handlers
     }()
     
