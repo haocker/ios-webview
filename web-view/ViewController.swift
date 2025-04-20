@@ -11,7 +11,7 @@ import WebKit
 
 class ViewController: UIViewController, WKScriptMessageHandler {
     
-    @IBOutlet weak var webView: WKWebView!
+    var webView: WKWebView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -81,7 +81,16 @@ class ViewController: UIViewController, WKScriptMessageHandler {
         
         
         userContentController.add(self, name: "getStatusBarHeight")
-        webView.configuration.userContentController = userContentController
+        
+        // 创建WKWebView配置
+        let configuration = WKWebViewConfiguration()
+        configuration.userContentController = userContentController
+        
+        // 通过编程方式创建WKWebView
+        webView = WKWebView(frame: self.view.bounds, configuration: configuration)
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        self.view.addSubview(webView)
+        
         // 加载本地HTML文件
         if let htmlPath = Bundle.main.path(forResource: "www/index", ofType: "html") {
             let url = URL(fileURLWithPath: htmlPath)
@@ -93,7 +102,6 @@ class ViewController: UIViewController, WKScriptMessageHandler {
         
         // 设置WebView为全屏，但不隐藏状态栏
         webView.frame = self.view.bounds
-        
     
     }
     
