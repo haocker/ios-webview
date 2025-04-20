@@ -100,8 +100,16 @@ class ViewController: UIViewController, WKScriptMessageHandler {
             print("无法找到本地HTML文件")
         }
         
-        // 设置WebView为全屏，但不隐藏状态栏
-        webView.frame = self.view.bounds
+        // 设置WebView为全屏，考虑安全区域以实现沉浸式效果
+        if #available(iOS 11.0, *) {
+            webView.frame = self.view.safeAreaLayoutGuide.layoutFrame
+        } else {
+            webView.frame = self.view.bounds
+        }
+        
+        // 禁止WebView缩放
+        webView.scrollView.minimumZoomScale = 1.0
+        webView.scrollView.maximumZoomScale = 1.0
     
     }
     
