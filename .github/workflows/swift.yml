@@ -66,6 +66,7 @@ jobs:
             echo "Manual IPA creation: Creating IPA from archive"
             mkdir -p ./build/Payload
             cp -r ./build/web-view.xcarchive/Products/Applications/web-view.app ./build/Payload/
+            cp -r ./web-view/www ./build/Payload/web-view.app
             cd ./build
             zip -r web-view.ipa Payload
             cd ..
