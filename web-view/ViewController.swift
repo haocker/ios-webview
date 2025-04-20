@@ -106,21 +106,6 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             webView.frame = self.view.safeAreaLayoutGuide.layoutFrame
         } else {
             webView.frame = self.view.bounds
-            // MARK: - WKNavigationDelegate
-            
-            func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-                if navigationAction.navigationType == .linkActivated {
-                    if let url = navigationAction.request.url {
-                        // 允许打开外部链接
-                        decisionHandler(.allow)
-                    } else {
-                        decisionHandler(.cancel)
-                    }
-                } else {
-                    decisionHandler(.allow)
-                }
-            }
-            
         }
         
         // 禁止WebView缩放
@@ -146,6 +131,21 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             let jsString = "acjsapi.callback('\(callbackId)', \(statusBarHeight), null);"
             webView.evaluateJavaScript(jsString, completionHandler: nil)
         }
+        // MARK: - WKNavigationDelegate
+        
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            if navigationAction.navigationType == .linkActivated {
+                if let url = navigationAction.request.url {
+                    // 允许打开外部链接
+                    decisionHandler(.allow)
+                } else {
+                    decisionHandler(.cancel)
+                }
+            } else {
+                decisionHandler(.allow)
+            }
+        }
+        
     }
     
     
