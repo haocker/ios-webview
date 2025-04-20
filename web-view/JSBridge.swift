@@ -94,7 +94,8 @@ class JSBridge: NSObject, WKScriptMessageHandler {
         switch message.name {
         case "getStatusBarHeight":
             let statusBarHeight = UIApplication.shared.statusBarFrame.height
-            sendCallback(callbackId: callbackId, result: statusBarHeight, error: nil)
+            let jsString = "acjsapi.callback('\(callbackId)', \(statusBarHeight), null);"
+            webView?.evaluateJavaScript(jsString, completionHandler: nil)
             
         case "getDeviceInfo":
             let deviceInfo = [
@@ -102,28 +103,15 @@ class JSBridge: NSObject, WKScriptMessageHandler {
                 "systemName": UIDevice.current.systemName,
                 "systemVersion": UIDevice.current.systemVersion
             ]
-            sendCallback(callbackId: callbackId, result: deviceInfo, error: nil)
+            if let jsonData = try? JSONSerialization.data(withJSONObject: deviceInfo, options: []),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                let jsString = "acjsapi.callback('\(callbackId)', \(jsonString), null);"
+                webView?.evaluateJavaScript(jsString, completionHandler: nil)
+            }
             
         default:
-            sendCallback(callbackId: callbackId, result: nil, error: "Method \(message.name) not implemented")
+            let jsString = "acjsapi.callback('\(callbackId)', null, 'Method \(message.name) not implemented');"
+            webView?.evaluateJavaScript(jsString, completionHandler: nil)
         }
-    }
-    
-    // 统一处理回调返回值
-    private func sendCallback(callbackId: String, result: Any?, error: String?) {
-        var jsString: String
-        if let error = error {
-            jsString = "acjsapi.callback('\(callbackId)', null, '\(error)');"
-        } else if let result = result {
-            if let jsonData = try? JSONSerialization.data(withJSONObject: result, options: []),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                jsString = "acjsapi.callback('\(callbackId)', \(jsonString), null);"
-            } else {
-                jsString = "acjsapi.callback('\(callbackId)', '\(result)', null);"
-            }
-        } else {
-            jsString = "acjsapi.callback('\(callbackId)', null, null);"
-        }
-        webView?.evaluateJavaScript(jsString, completionHandler: nil)
     }
 }
