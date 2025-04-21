@@ -45,7 +45,7 @@ class JSBridge: NSObject, WKScriptMessageHandler {
         setupUserScript()
     }
     // 定义方法处理逻辑的映射表
-    private let methodHandlers: [String: ([String: Any]) -> Any?]
+    private var methodHandlers: [String: ([String: Any]) -> Any?]
     
     // 统一处理返回值
     private func sendResponse(callbackId: String, result: Any?) {
