@@ -35,15 +35,15 @@ class ViewController: UIViewController, WKNavigationDelegate {
         // 初始化JSBridge
         jsBridge = JSBridge(webView: webView)
         
-        // 加载本地HTML文件，并设置baseURL为www目录
-        if let htmlPath = Bundle.main.path(forResource: "www/index", ofType: "html") {
-            let htmlURL = URL(fileURLWithPath: htmlPath)
-            if let basePath = Bundle.main.path(forResource: "www", ofType: nil) {
-                let baseURL = URL(fileURLWithPath: basePath)
-                webView.loadFileURL(htmlURL, allowingReadAccessTo: baseURL)
-            } else {
-                let request = URLRequest(url: htmlURL)
-                webView.load(request)
+        // 启动本地服务器
+        if let wwwPath = Bundle.main.path(forResource: "www", ofType: nil) {
+            let port = 57640
+            SimpleServer.start(documentRoot: wwwPath, port: port)
+            
+            // 构建本地服务器URL并加载
+            if let url = URL(string: "http://localhost:\(port)/index.html") {
+            let request = URLRequest(url: url)
+            webView.load(request)
             }
         } else {
             print("无法找到本地HTML文件")
