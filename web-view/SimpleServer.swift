@@ -34,7 +34,7 @@ class SimpleServer {
         
         // 绑定 socket
         let bindResult = withUnsafePointer(to: &addr) { pointer in
-            bind(serverSocket, UnsafePointer<sockaddr>(bitPattern: pointer), socklen_t(MemoryLayout<sockaddr_in>.size))
+            bind(serverSocket, UnsafeRawPointer(pointer).assumingMemoryBound(to: sockaddr.self), socklen_t(MemoryLayout<sockaddr_in>.size))
         }
         
         guard bindResult == 0 else {
@@ -67,7 +67,7 @@ class SimpleServer {
                 var clientAddrLen = socklen_t(MemoryLayout<sockaddr_in>.size)
                 
                 let clientSocket = withUnsafeMutablePointer(to: &clientAddr) { pointer in
-                    accept(serverSocket, UnsafeMutablePointer<sockaddr>(bitPattern: pointer), &clientAddrLen)
+                    accept(serverSocket, UnsafeMutableRawPointer(pointer).assumingMemoryBound(to: sockaddr.self), &clientAddrLen)
                 }
                 
                 guard clientSocket >= 0 else {
