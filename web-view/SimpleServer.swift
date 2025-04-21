@@ -4,7 +4,7 @@ class SimpleServer {
     private static var serverSocket: Int32 = -1
     private static var clientSockets: [Int32] = []
     private static var documentRoot: String = ""
-    private static var port: UInt16 = 0
+    public static var port: UInt16 = 0
     private static let maxConnections = 10
     
     static func start(documentRoot: String, port: Int = 0) {
