@@ -5,8 +5,11 @@ class JSBridge: NSObject, WKScriptMessageHandler {
     
     private weak var webView: WKWebView?
     
-    init(webView: WKWebView) {
+    private var getHomeBarHeightClosure: (() -> CGFloat)?
+    
+    init(webView: WKWebView, getHomeBarHeightClosure: @escaping () -> CGFloat = { 0 }) {
         self.webView = webView
+        self.getHomeBarHeightClosure = getHomeBarHeightClosure
         super.init()
         setupMessageHandlers()
         setupUserScript()
@@ -33,6 +36,10 @@ class JSBridge: NSObject, WKScriptMessageHandler {
                 return ["processed": "处理后的数据: \(input)" ]
             }
             return ["error": "无效的输入数据"]
+        }
+        
+        handlers["getHomeBarHeight"] = { _ in
+            return self.getHomeBarHeightClosure?() ?? 0
         }
         
         return handlers

@@ -32,8 +32,10 @@ class ViewController: UIViewController, WKNavigationDelegate {
         webView.navigationDelegate = self
         self.view.addSubview(webView)
         
-        // 初始化JSBridge
-        jsBridge = JSBridge(webView: webView)
+        // 初始化JSBridge，并传递获取Home Bar高度的闭包
+        jsBridge = JSBridge(webView: webView) { [weak self] in
+            return self?.view.safeAreaInsets.bottom ?? 0
+        }
         
         // 启动本地服务器
         if let wwwPath = Bundle.main.path(forResource: "www", ofType: nil) {
