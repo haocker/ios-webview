@@ -4,12 +4,16 @@ class SimpleServer {
     private static var serverSocket: Int32 = -1
     private static var clientSockets: [Int32] = []
     private static var documentRoot: String = ""
-    private static var port: UInt16 = 8080
+    private static var port: UInt16 = 0
     private static let maxConnections = 10
     
-    static func start(documentRoot: String, port: Int) {
+    static func start(documentRoot: String, port: Int = 0) {
         self.documentRoot = documentRoot
-        self.port = UInt16(port)
+        if port == 0 {
+            self.port = findAvailablePort()
+        } else {
+            self.port = UInt16(port)
+        }
         setupServer()
         startServer()
     }
@@ -163,5 +167,44 @@ class SimpleServer {
     
     private static func htons(_ value: UInt16) -> UInt16 {
         return (value << 8) + (value >> 8)
+    }
+    private static func findAvailablePort() -> UInt16 {
+        var testSocket: Int32 = -1
+        var availablePort: UInt16 = 0
+        
+        for port in 8000...9000 {
+            testSocket = socket(AF_INET, SOCK_STREAM, 0)
+            guard testSocket >= 0 else {
+                continue
+            }
+            
+            var reuseAddr = 1
+            setsockopt(testSocket, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, socklen_t(MemoryLayout<Int>.size))
+            
+            var addr = sockaddr_in()
+            addr.sin_family = sa_family_t(AF_INET)
+            addr.sin_port = htons(UInt16(port))
+            addr.sin_addr.s_addr = INADDR_ANY
+            
+            let bindResult = withUnsafePointer(to: &addr) { pointer in
+                bind(testSocket, UnsafeRawPointer(pointer).assumingMemoryBound(to: sockaddr.self), socklen_t(MemoryLayout<sockaddr_in>.size))
+            }
+            
+            if bindResult == 0 {
+                availablePort = UInt16(port)
+                close(testSocket)
+                break
+            }
+            
+            close(testSocket)
+        }
+        
+        if availablePort == 0 {
+            print("未找到可用端口")
+            return 8080 // 默认端口作为备用
+        }
+        
+        print("找到可用端口: \(availablePort)")
+        return availablePort
     }
 }

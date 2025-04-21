@@ -37,10 +37,10 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         // 启动本地服务器
         if let wwwPath = Bundle.main.path(forResource: "www", ofType: nil) {
-            let port = 57640
-            SimpleServer.start(documentRoot: wwwPath, port: port)
+            SimpleServer.start(documentRoot: wwwPath)
             
             // 构建本地服务器URL并加载
+            let port = SimpleServer.port
             if let url = URL(string: "http://localhost:\(port)/index.html") {
             let request = URLRequest(url: url)
             webView.load(request)
@@ -57,6 +57,14 @@ class ViewController: UIViewController, WKNavigationDelegate {
         webView.scrollView.minimumZoomScale = 1.0
         webView.scrollView.maximumZoomScale = 1.0
     
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // 获取Home Bar高度并存储到全局设置中
+        if #available(iOS 11.0, *) {
+            GlobalSettings.homeBarHeight = view.safeAreaInsets.bottom
+        }
     }
     
     override func didReceiveMemoryWarning() {

@@ -35,6 +35,10 @@ class JSBridge: NSObject, WKScriptMessageHandler {
             return ["error": "无效的输入数据"]
         }
         
+        handlers["getHomeBarHeight"] = { _ in
+            return GlobalSettings.homeBarHeight
+        }
+        
         return handlers
     }()
     
