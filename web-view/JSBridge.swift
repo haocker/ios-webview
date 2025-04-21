@@ -11,11 +11,8 @@ class JSBridge: NSObject, WKScriptMessageHandler {
         self.webView = webView
         self.getHomeBarHeightClosure = getHomeBarHeightClosure
         super.init()
-        setupMessageHandlers()
-        setupUserScript()
-    }
-    // 定义方法处理逻辑的映射表
-    private let methodHandlers: [String: ([String: Any]) -> Any?] = {
+        // 一定要在实例（self）完全初始化之后执行方法处理逻辑的映射表初始化
+        // 因为在闭包中可能引用到self的属性或方法，如果在self未完全初始化时执行会导致未定义行为
         var handlers: [String: ([String: Any]) -> Any?] = [:]
         
         handlers["getStatusBarHeight"] = { _ in
@@ -42,8 +39,13 @@ class JSBridge: NSObject, WKScriptMessageHandler {
             return self.getHomeBarHeightClosure?() ?? 0
         }
         
-        return handlers
-    }()
+        self.methodHandlers = handlers
+        
+        setupMessageHandlers()
+        setupUserScript()
+    }
+    // 定义方法处理逻辑的映射表
+    private let methodHandlers: [String: ([String: Any]) -> Any?]
     
     // 统一处理返回值
     private func sendResponse(callbackId: String, result: Any?) {
