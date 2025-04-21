@@ -34,7 +34,7 @@ class SimpleServer {
         
         // 绑定 socket
         let bindResult = withUnsafePointer(to: &addr) { pointer in
-            bind(serverSocket, UnsafePointer<sockaddr>(pointer), socklen_t(MemoryLayout<sockaddr_in>.size))
+            bind(serverSocket, pointer, socklen_t(MemoryLayout<sockaddr_in>.size))
         }
         
         guard bindResult == 0 else {
@@ -67,7 +67,7 @@ class SimpleServer {
                 var clientAddrLen = socklen_t(MemoryLayout<sockaddr_in>.size)
                 
                 let clientSocket = withUnsafeMutablePointer(to: &clientAddr) { pointer in
-                    accept(serverSocket, UnsafeMutablePointer<sockaddr>(pointer), &clientAddrLen)
+                    accept(serverSocket, pointer, &clientAddrLen)
                 }
                 
                 guard clientSocket >= 0 else {
@@ -140,16 +140,16 @@ class SimpleServer {
             
             response = "HTTP/1.1 200 OK\r\nContent-Type: \(contentType)\r\nContent-Length: \(fileData.count)\r\n\r\n"
             let responseHeaderData = response.data(using: .utf8)!
-            responseHeaderData.withUnsafeBytes { bufferPointer in
+            let _ = responseHeaderData.withUnsafeBytes { bufferPointer in
                 write(clientSocket, bufferPointer.baseAddress, responseHeaderData.count)
             }
-            fileData.withUnsafeBytes { bufferPointer in
+            let _ = fileData.withUnsafeBytes { bufferPointer in
                 write(clientSocket, bufferPointer.baseAddress, fileData.count)
             }
         } else {
             response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
             let responseData = response.data(using: .utf8)!
-            responseData.withUnsafeBytes { bufferPointer in
+            let _ = responseData.withUnsafeBytes { bufferPointer in
                 write(clientSocket, bufferPointer.baseAddress, responseData.count)
             }
         }
