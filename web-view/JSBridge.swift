@@ -13,39 +13,13 @@ class JSBridge: NSObject, WKScriptMessageHandler {
         super.init()
         // 一定要在实例（self）完全初始化之后执行方法处理逻辑的映射表初始化
         // 因为在闭包中可能引用到self的属性或方法，如果在self未完全初始化时执行会导致未定义行为
-        var handlers: [String: ([String: Any]) -> Any?] = [:]
-        
-        handlers["getStatusBarHeight"] = { _ in
-            return UIApplication.shared.statusBarFrame.height
-        }
-        
-        handlers["getDeviceInfo"] = { _ in
-            return [
-                "model": UIDevice.current.model,
-                "systemName": UIDevice.current.systemName,
-                "systemVersion": UIDevice.current.systemVersion
-            ]
-        }
-        
-        handlers["processData"] = { params in
-            if let data = params["args"] as? [String: Any],
-               let input = data["data"] as? String {
-                return ["processed": "处理后的数据: \(input)" ]
-            }
-            return ["error": "无效的输入数据"]
-        }
-        
-        handlers["getHomeBarHeight"] = { _ in
-            return self.getHomeBarHeightClosure?() ?? 0
-        }
-        
-        self.methodHandlers = handlers
+        self.methodHandlers = createMethodHandlers()
         
         setupMessageHandlers()
         setupUserScript()
     }
     // 定义方法处理逻辑的映射表
-    private var methodHandlers: [String: ([String: Any]) -> Any?]
+    private var methodHandlers: [String: ([String: Any]) -> Any?] = [:]
     
     // 统一处理返回值
     private func sendResponse(callbackId: String, result: Any?) {
@@ -91,6 +65,36 @@ class JSBridge: NSObject, WKScriptMessageHandler {
             }
         }
     }
+    private func createMethodHandlers() -> [String: ([String: Any]) -> Any?] {
+        var handlers: [String: ([String: Any]) -> Any?] = [:]
+        
+        handlers["getStatusBarHeight"] = { _ in
+            return UIApplication.shared.statusBarFrame.height
+        }
+        
+        handlers["getDeviceInfo"] = { _ in
+            return [
+                "model": UIDevice.current.model,
+                "systemName": UIDevice.current.systemName,
+                "systemVersion": UIDevice.current.systemVersion
+            ]
+        }
+        
+        handlers["processData"] = { params in
+            if let data = params["args"] as? [String: Any],
+               let input = data["data"] as? String {
+                return ["processed": "处理后的数据: \(input)" ]
+            }
+            return ["error": "无效的输入数据"]
+        }
+        
+        handlers["getHomeBarHeight"] = { _ in
+            return self.getHomeBarHeightClosure?() ?? 0
+        }
+        
+        return handlers
+    }
+    
     private func setupMessageHandlers() {
         // 自动注册所有需要暴露给JS的方法
         let exposedMethods = Array(methodHandlers.keys)
